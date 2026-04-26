@@ -57,8 +57,8 @@ int main()
             op[j++] = postfix[i++];
         }
         op[j] = '\0';
-
-        i++;
+        if (postfix[i] == ' ')
+            i++;
         j = 0;
 
         if (isdigit(op[0]))
