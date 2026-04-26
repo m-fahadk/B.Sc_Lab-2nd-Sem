@@ -1,112 +1,117 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node
+struct node
 {
     int data;
-    struct Node *prev;
-    struct Node *next;
+    struct node *prev;
+    struct node *next;
 };
 
-struct Node *head = NULL;
+struct node *head = NULL;
 
 void insert_begin()
 {
-    struct Node *newnode;
+    struct node *newnode;
     int value;
 
-    newnode = (struct Node *)malloc(sizeof(struct Node));
+    newnode = (struct node *)malloc(sizeof(struct node));
 
     printf("Enter value: ");
     scanf("%d", &value);
-
     newnode->data = value;
-    newnode->prev = NULL;
-    newnode->next = head;
 
-    if (head != NULL)
+    if (head == NULL)
+    {
+        head = newnode;
+        newnode->next = head;
+        newnode->prev = head;
+    }
+    else
+    {
+        newnode->next = head;
+        newnode->prev = head->prev;
+        head->prev->next = newnode;
         head->prev = newnode;
-
-    head = newnode;
+        head = newnode;
+    }
 
     printf("Inserted at beginning.\n");
 }
 
 void insert_end()
 {
-    struct Node *newnode, *temp;
-    int value;
-
-    newnode = (struct Node *)malloc(sizeof(struct Node));
-
-    printf("Enter value: ");
-    scanf("%d", &value);
-
-    newnode->data = value;
-    newnode->next = NULL;
 
     if (head == NULL)
     {
-        newnode->prev = NULL;
-        head = newnode;
+        insert_begin();
         return;
     }
+    else
+    {
+        struct node *newnode, *temp;
+        int value;
+        newnode = (struct node *)malloc(sizeof(struct node));
 
-    temp = head;
-    while (temp->next != NULL)
-        temp = temp->next;
+        printf("Enter value: ");
+        scanf("%d", &value);
+        newnode->data = value;
 
-    temp->next = newnode;
-    newnode->prev = temp;
+        temp = head;
+        while (temp->next != head)
+        {
+            temp = temp->next;
+        }
+
+        newnode->next = temp->next;
+        temp->next->prev = newnode;
+        temp->next = newnode;
+        newnode->prev = temp;
+    }
 
     printf("Inserted at end.\n");
 }
 
 void insert_middle()
 {
-    struct Node *newnode, *temp;
-    int pos, i, value;
-
-    scanf("%d", &pos);
-    printf("Enter position: ");
-
-    if (pos == 1)
+    if (head == NULL)
     {
         insert_begin();
         return;
     }
 
-    newnode = (struct Node *)malloc(sizeof(struct Node));
+    struct node *newnode, *temp;
+    int length = 1, i, value;
+    newnode = (struct node *)malloc(sizeof(struct node));
 
     printf("Enter value: ");
     scanf("%d", &value);
     newnode->data = value;
+    temp = head;
+
+    while (temp->next != head)
+    {
+        temp = temp->next;
+        length += 1;
+    }
 
     temp = head;
-    for (i = 1; i < pos - 1 && temp != NULL; i++)
-        temp = temp->next;
-
-    if (temp == NULL)
+    for (i = 1; i < length / 2; i++)
     {
-        printf("Invalid position\n");
-        free(newnode);
-        return;
+        temp = temp->next;
     }
 
     newnode->next = temp->next;
     newnode->prev = temp;
-
-    if (temp->next != NULL)
-        temp->next->prev = newnode;
-
+    temp->next->prev = newnode;
     temp->next = newnode;
 
-    printf("Inserted at position %d\n", pos);
+    printf("Inserted in the middle");
 }
 
 void delete_begin()
 {
-    struct Node *temp;
+    struct node *temp;
 
     if (head == NULL)
     {
@@ -115,11 +120,16 @@ void delete_begin()
     }
 
     temp = head;
-    head = head->next;
-
-    if (head != NULL)
-        head->prev = NULL;
-
+    if (head->next == head)
+    {
+        head = NULL;
+    }
+    else
+    {
+        head->prev->next = head->next;
+        head->next->prev = head->prev;
+        head = head->next;
+    }
     free(temp);
 
     printf("First node deleted.\n");
@@ -127,7 +137,7 @@ void delete_begin()
 
 void delete_end()
 {
-    struct Node *temp;
+    struct node *temp;
 
     if (head == NULL)
     {
@@ -136,14 +146,18 @@ void delete_end()
     }
 
     temp = head;
-
-    while (temp->next != NULL)
-        temp = temp->next;
-
-    if (temp->prev != NULL)
-        temp->prev->next = NULL;
-    else
+    if (head->next == head)
+    {
         head = NULL;
+    }
+
+    else
+    {
+
+        temp = head->prev;
+        temp->prev->next = temp->next;
+        temp->next->prev = temp->prev;
+    }
 
     free(temp);
 
@@ -152,42 +166,44 @@ void delete_end()
 
 void delete_middle()
 {
-    struct Node *temp;
-    int pos, i;
-
-    printf("Enter position: ");
-    scanf("%d", &pos);
-
-    if (pos == 1)
+    if (head == NULL)
     {
-        delete_begin();
+        printf("List empty.\n");
         return;
     }
 
+    struct node *temp;
+    int length = 1, i;
     temp = head;
-    for (i = 1; i < pos && temp != NULL; i++)
-        temp = temp->next;
-
-    if (temp == NULL)
+    if (head->next == head)
     {
-        printf("Invalid position\n");
-        return;
+        head = NULL;
     }
 
-    if (temp->prev != NULL)
+    else
+    {
+        while (temp->next != head)
+        {
+            temp = temp->next;
+            length += 1;
+        }
+
+        temp = head;
+        for (i = 0; i < (length + 1) / 2; i++)
+        {
+            temp = temp->next;
+        }
         temp->prev->next = temp->next;
-
-    if (temp->next != NULL)
         temp->next->prev = temp->prev;
-
+    }
     free(temp);
 
-    printf("Node deleted at position %d\n", pos);
+    printf("Node deleted at mid");
 }
 
 void traversal()
 {
-    struct Node *temp = head;
+    struct node *temp = head;
 
     if (head == NULL)
     {
@@ -196,12 +212,13 @@ void traversal()
     }
 
     printf("List: ");
-    while (temp != NULL)
+    printf("Head<-> ");
+    while (temp->next != head)
     {
         printf("%d <-> ", temp->data);
         temp = temp->next;
     }
-    printf("NULL\n");
+    printf("<-> %d <-> Head\n", temp->data);
 }
 
 int main()
@@ -210,7 +227,7 @@ int main()
 
     do
     {
-        printf("\n===== DOUBLY LINKED LIST =====\n");
+        printf("\n===== CIRCULAR LINKED LIST =====\n");
         printf("1. Insertion\n");
         printf("2. Deletion\n");
         printf("3. Traversal\n");
@@ -263,13 +280,4 @@ int main()
     } while (choice != 4);
 
     return 0;
-}
-
-struct Node *createNode(int data, struct Node *next)
-{
-    struct Node *node;
-    node = (struct Node *)malloc(sizeof(struct Node));
-    node->data = data;
-    node->next = next;
-    return node;
 }
